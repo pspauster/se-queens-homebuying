@@ -11,8 +11,8 @@ bbls_string <- paste0("bbl = '",paste(document_ids, collapse = "' OR bbl = '"),"
   
 master <- read_csv(URLencode(paste0("https://data.cityofnewyork.us/resource/bnx9-e6tj.csv?",
                           "$where=document_date>='2013-01-01' AND doc_type='DEED'",
-                          "&$limit=800000")))
-#629K of these
+                          "&$limit=800000"))) %>% 
+#629K of these. make docid a character
 
 document_ids <- master %>% pull(document_id)
 
@@ -67,3 +67,10 @@ prop_master <- read_csv(URLencode(paste0("https://data.cityofnewyork.us/resource
                                          "&$limit=10000")))
 prop_all <- inner_join(prop_master, prop, by = "document_id") %>% 
   inner_join(prop_parties, by = "document_id")
+
+rahman <- read_csv(URLencode(paste0("https://data.cityofnewyork.us/resource/636b-3b5g.csv?",
+                                    "$where=name='RAHMAN, ABDUL'",
+                                    "&$limit=10000")))
+
+rahman_all <- left_join(rahman, master %>% mutate(document_id = as.character(document_id)), by = "document_id") %>% 
+  left_join
