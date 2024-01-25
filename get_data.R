@@ -3,28 +3,31 @@ library(tidyverse)
 pluto <- read_csv(URLencode(paste0("https://data.cityofnewyork.us/resource/64uk-42ks.csv?",
                                    "$where=cd=412",
                                    "&$limit=100000")))
+##fix 
 
 bbls <- pluto %>% pull(bbl)
 
 bbls_string <- paste0("bbl = '",paste(document_ids, collapse = "' OR bbl = '"),"'")
   
-legals <- read_csv(URLencode(paste0("https://data.cityofnewyork.us/resource/8h5j-fqxa.csv?",
-                                    "$where=", document_ids_string,
-                                    "&$limit=10000")))%>%
-  mutate(bbl = paste0(
-                    as.character(borough),
-                    str_pad(block %>% as.character() , width = 5, pad = "0", side = "left"),
-                    str_pad(lot %>% as.character() , width = 4, pad = "0", side = "left"))
-                  )
-
 master <- read_csv(URLencode(paste0("https://data.cityofnewyork.us/resource/bnx9-e6tj.csv?",
                           "$where=document_date>='2013-01-01' AND doc_type='DEED'",
                           "&$limit=800000")))
+#629K of these
 
 document_ids <- master %>% pull(document_id)
 
 document_ids_string <- paste0("document_id = '",paste(document_ids, collapse = "' OR document_id = '"),"'")
 
+legals <- read_csv(URLencode(paste0("https://data.cityofnewyork.us/resource/8h5j-fqxa.csv?",
+                                    "$select=document_id,borough,block,lot",
+                                    "$&where=document_id=", document_ids_string,
+                                    "&$limit=10000000")))%>%
+  mutate(bbl = paste0(
+    as.character(borough),
+    str_pad(block %>% as.character() , width = 5, pad = "0", side = "left"),
+    str_pad(lot %>% as.character() , width = 4, pad = "0", side = "left"))
+  )
+#more than 10M
 
 parties <- read_csv(URLencode(paste0("https://data.cityofnewyork.us/resource/636b-3b5g.csv?",
                                      "$where=", document_ids_string,
